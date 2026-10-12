@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1d2a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ARC Winter">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<title>ARC Winter Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a header with today's date as the hero, a check-in panel, then the full-width leaderboard. */
+:root {
+  --bg: #eef2f5;
+  --surface: #ffffff;
+  --ink: #0f1d2a;
+  --muted: #5b6b78;
+  --line: #d4dde4;
+  --ice: #1d6fa5;
+  --ice-soft: #dcebf5;
+  --ember: #c2410c;
+  --ember-soft: #fde9dc;
+  --good: #15803d;
+  --font-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b141c; --surface: #121e29; --ink: #e6eef4; --muted: #8fa1b0; --line: #23323f;
+    --ice: #6cb6e6; --ice-soft: #16314a; --ember: #fb8a4c; --ember-soft: #3a2116; --good: #4ade80;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0); background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 48px; display: grid; gap: 24px; }
+
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; border-bottom: 3px solid var(--ink); padding-bottom: 14px; }
+.brand { font-family: var(--font-display); font-weight: 900; font-size: clamp(2.4rem, 7vw, 3.6rem); line-height: .9; letter-spacing: .01em; text-transform: uppercase; margin: 0; }
+.brand span { color: var(--ice); display: block; font-size: .42em; letter-spacing: .14em; font-weight: 800; margin-bottom: 4px; }
+.today { text-align: right; }
+.today .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+.today .date { font-family: var(--font-display); font-weight: 800; font-size: 1.9rem; line-height: 1; text-transform: uppercase; }
+
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.panel h2 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; text-transform: uppercase; letter-spacing: .03em; display: flex; align-items: center; gap: 10px; }
+.tag { font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: .1em; padding: 2px 8px; border-radius: 99px; }
+.tag.time { background: var(--ice-soft); color: var(--ice); }
+.tag.att { background: var(--ember-soft); color: var(--ember); }
+.hint { margin: 0; color: var(--muted); font-size: 13px; }
+
+label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); display: block; margin-bottom: 4px; }
+select, input { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 9px 10px; width: 100%; min-width: 0; }
+select:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--ice); outline-offset: 2px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.row > div { flex: 1 1 90px; min-width: 0; }
+button { font: inherit; font-weight: 600; cursor: pointer; border-radius: 6px; padding: 10px 16px; border: 1px solid transparent; }
+.btn-ice { background: var(--ice); color: var(--surface); }
+.btn-ember { background: var(--ember); color: var(--surface); }
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.full { width: 100%; }
+
+.who { display: grid; gap: 10px; }
+.who .row > div:first-child { flex: 3 1 200px; }
+.addbox { display: flex; gap: 8px; flex-wrap: wrap; }
+.addbox input { flex: 1 1 180px; }
+
+.present-box { display: grid; gap: 10px; }
+.present-state { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; text-transform: uppercase; line-height: 1; }
+.present-state.on { color: var(--good); }
+.mini { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.mini b { font-family: var(--font-mono); color: var(--ink); font-weight: 500; }
+
+.toast { font-size: 13px; min-height: 1.2em; margin: 0; color: var(--good); }
+.toast.err { color: var(--ember); }
+
+/* leaderboard */
+.board-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px; }
+.board-head h2 { font-family: var(--font-display); font-weight: 900; font-size: 2rem; text-transform: uppercase; margin: 0; }
+.sorts { display: flex; gap: 4px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 3px; }
+.sorts button { padding: 6px 12px; font-size: 13px; background: transparent; color: var(--muted); }
+.sorts button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+table { width: 100%; border-collapse: collapse; min-width: 460px; }
+th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 600; }
+th.num, td.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+th.active { color: var(--ink); }
+td.rank { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; width: 48px; color: var(--muted); }
+tr.top1 td.rank { color: var(--ember); }
+td.name { font-weight: 600; }
+tr.me td { background: var(--ice-soft); }
+.lead { display: inline-block; font-family: var(--font-body); font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 1px 6px; border-radius: 99px; margin-right: 6px; vertical-align: 1px; }
+.lead.t { background: var(--ice-soft); color: var(--ice); }
+.lead.a { background: var(--ember-soft); color: var(--ember); }
+.streak-live { color: var(--ember); }
+.empty { padding: 28px 18px; text-align: center; color: var(--muted); }
+.notice { background: var(--ember-soft); color: var(--ink); border-radius: 8px; padding: 10px 14px; font-size: 13px; }
+footer { font-size: 12px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1 class="brand"><span>ARC</span>Winter Challenge</h1>
+    <div class="today">
+      <div class="lbl">Today</div>
+      <div class="date" id="todayLabel">—</div>
+    </div>
+  </header>
+
+  <div class="notice" id="offline" hidden>Can't reach the server right now. Check your connection; the page will retry automatically.</div>
+
+  <section class="panel who" aria-labelledby="whoH">
+    <h2 id="whoH">Who's checking in?</h2>
+    <div class="row">
+      <div>
+        <label for="athleteSel">Athlete</label>
+        <select id="athleteSel"><option value="">Select your name…</option></select>
+      </div>
+    </div>
+    <div class="addbox">
+      <input id="newName" type="text" maxlength="40" placeholder="New athlete? Add your name" aria-label="New athlete name">
+      <button class="btn-ghost" id="addBtn" type="button">Add athlete</button>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel" aria-labelledby="attH">
+      <h2 id="attH">Attendance <span class="tag att">Challenge 2</span></h2>
+      <div class="present-box">
+        <div class="present-state" id="presentState">Not checked in</div>
+        <p class="hint" id="presentHint">Mark yourself present for today's session.</p>
+        <button class="btn-ember full" id="presentBtn" type="button" disabled>Mark present today</button>
+        <div class="mini">
+          <span>Sessions <b id="mySessions">0</b></span>
+          <span>Current streak <b id="myStreak">0</b></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="timeH">
+      <h2 id="timeH">Training time <span class="tag time">Challenge 1</span></h2>
+      <form id="timeForm" class="row" novalidate>
+        <div><label for="hrs">Hours</label><input id="hrs" type="number" min="0" max="10" step="1" inputmode="numeric" placeholder="0"></div>
+        <div><label for="mins">Minutes</label><input id="mins" type="number" min="0" max="59" step="1" inputmode="numeric" placeholder="45"></div>
+        <div style="flex-basis:150px"><label for="day">Date</label><input id="day" type="date"></div>
+      </form>
+      <button class="btn-ice full" id="timeBtn" type="submit" form="timeForm" disabled>Add training time</button>
+      <div class="mini">
+        <span>Logged that day <b id="dayTotal">0m</b></span>
+        <span>Season total <b id="myTotal">0m</b></span>
+      </div>
+    </section>
+  </div>
+  <p class="toast" id="toast" role="status"></p>
+
+  <section aria-labelledby="boardH" style="display:grid;gap:12px">
+    <div class="board-head">
+      <h2 id="boardH">Leaderboard</h2>
+      <div class="sorts" role="group" aria-label="Sort leaderboard">
+        <button type="button" data-sort="minutes" aria-pressed="true">Most time</button>
+        <button type="button" data-sort="sessions" aria-pressed="false">Most sessions</button>
+        <button type="button" data-sort="streak" aria-pressed="false">Streak</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th scope="col">#</th>
+          <th scope="col">Athlete</th>
+          <th scope="col" class="num" data-col="minutes">Total time</th>
+          <th scope="col" class="num" data-col="sessions">Sessions</th>
+          <th scope="col" class="num" data-col="streak">Streak</th>
+        </tr></thead>
+        <tbody id="board"><tr><td colspan="5" class="empty">No athletes yet. Add your name above to join the challenge.</td></tr></tbody>
+      </table>
+    </div>
+    <footer>Streak counts consecutive days marked present, ending today (or yesterday if you haven't checked in yet today). Time can be logged for past days; attendance is for today only.</footer>
+  </section>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, "0");
+  const keyOf = (d) => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  const fromKey = (k) => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };
+  let todayKey = keyOf(new Date());
+
+  const fmt = (m) => { m = Math.round(m || 0); const h = Math.floor(m / 60), r = m % 60; return h ? h + "h " + pad(r) + "m" : r + "m"; };
+  const toast = (msg, err) => { const t = $("toast"); t.textContent = msg; t.classList.toggle("err", !!err); clearTimeout(toast.t); toast.t = setTimeout(() => (t.textContent = ""), 4000); };
+
+  let athletes = [];   // [{id,name}]
+  let logs = {};       // athleteId -> { "YYYY-MM-DD": {m, p} }
+  let sortBy = "minutes";
+  let online = false, busy = false;
+  let me = null;
+  try { me = localStorage.getItem("arc-me") || null; } catch (e) {}
+
+  function setToday(k) {
+    todayKey = k;
+    $("todayLabel").textContent = fromKey(k).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+    $("day").max = k;
+    if (!$("day").value || $("day").value > k) $("day").value = k;
+  }
+  setToday(todayKey);
+
+  // ---- derived stats ----
+  function stats(aid) {
+    const days = logs[aid] || {};
+    let minutes = 0, sessions = 0;
+    for (const k in days) { minutes += Number(days[k].m) || 0; if (days[k].p) sessions++; }
+    let streak = 0;
+    const d = fromKey(todayKey);
+    if (!(days[keyOf(d)] && days[keyOf(d)].p)) d.setDate(d.getDate() - 1);
+    while (days[keyOf(d)] && days[keyOf(d)].p) { streak++; d.setDate(d.getDate() - 1); }
+    const live = !!(days[todayKey] && days[todayKey].p);
+    return { minutes, sessions, streak, live, days };
+  }
+
+  // ---- render ----
+  const known = () => !!me && athletes.some((a) => a.id === me);
+  function renderSelect() {
+    const sel = $("athleteSel");
+    sel.textContent = "";
+    const o0 = document.createElement("option"); o0.value = ""; o0.textContent = "Select your name…"; sel.appendChild(o0);
+    [...athletes].sort((a, b) => a.name.localeCompare(b.name)).forEach((a) => {
+      const o = document.createElement("option"); o.value = a.id; o.textContent = a.name; sel.appendChild(o);
+    });
+    sel.value = known() ? me : "";
+  }
+  function renderMine() {
+    const ok = known() && online && !busy;
+    $("presentBtn").disabled = !ok;
+    $("timeBtn").disabled = !ok;
+    $("addBtn").disabled = !online || busy;
+    if (!known()) {
+      $("presentState").textContent = "Not checked in"; $("presentState").classList.remove("on");
+      $("presentBtn").textContent = "Mark present today"; $("presentBtn").className = "btn-ember full";
+      $("presentHint").textContent = "Select your name to check in.";
+      $("mySessions").textContent = "0"; $("myStreak").textContent = "0 days";
+      $("myTotal").textContent = "0m"; $("dayTotal").textContent = "0m";
+      return;
+    }
+    const s = stats(me);
+    $("presentState").textContent = s.live ? "Present today ✓" : "Not checked in";
+    $("presentState").classList.toggle("on", s.live);
+    $("presentHint").textContent = s.live ? "You're counted for today. Tap below if you marked by mistake." : "Mark yourself present for today's session.";
+    $("presentBtn").textContent = s.live ? "Undo today's check-in" : "Mark present today";
+    $("presentBtn").className = (s.live ? "btn-ghost" : "btn-ember") + " full";
+    $("mySessions").textContent = s.sessions;
+    $("myStreak").textContent = s.streak + (s.streak === 1 ? " day" : " days");
+    $("myTotal").textContent = fmt(s.minutes);
+    const dk = $("day").value || todayKey;
+    $("dayTotal").textContent = fmt(s.days[dk] ? s.days[dk].m : 0);
+  }
+  function renderBoard() {
+    const body = $("board");
+    body.textContent = "";
+    document.querySelectorAll(".sorts button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.sort === sortBy)));
+    document.querySelectorAll("th[data-col]").forEach((th) => th.classList.toggle("active", th.dataset.col === sortBy));
+    if (!athletes.length) {
+      const tr = document.createElement("tr"); const td = document.createElement("td");
+      td.colSpan = 5; td.className = "empty"; td.textContent = online ? "No athletes yet. Add your name above to join the challenge." : "Loading the leaderboard…";
+      tr.appendChild(td); body.appendChild(tr); return;
+    }
+    const rows = athletes.map((a) => Object.assign({ id: a.id, name: a.name }, stats(a.id)));
+    const maxT = Math.max(...rows.map((r) => r.minutes)), maxA = Math.max(...rows.map((r) => r.sessions));
+    rows.sort((a, b) => b[sortBy] - a[sortBy] || b.minutes - a.minutes || b.sessions - a.sessions || a.name.localeCompare(b.name));
+    let rank = 0, prev = null;
+    rows.forEach((r, i) => {
+      if (prev === null || r[sortBy] !== prev) rank = i + 1;
+      prev = r[sortBy];
+      const tr = document.createElement("tr");
+      if (rank === 1 && r[sortBy] > 0) tr.classList.add("top1");
+      if (r.id === me) tr.classList.add("me");
+      const c = (cls, txt) => { const td = document.createElement("td"); td.className = cls; td.textContent = txt; tr.appendChild(td); return td; };
+      c("rank", rank);
+      const nm = c("name", "");
+      if (maxT > 0 && r.minutes === maxT) { const s = document.createElement("span"); s.className = "lead t"; s.textContent = "Time leader"; nm.appendChild(s); }
+      if (maxA > 0 && r.sessions === maxA) { const s = document.createElement("span"); s.className = "lead a"; s.textContent = "Attendance leader"; nm.appendChild(s); }
+      nm.appendChild(document.createTextNode(r.name));
+      c("num", fmt(r.minutes));
+      c("num", r.sessions);
+      const st = c("num" + (r.live && r.streak ? " streak-live" : ""), r.streak + (r.live && r.streak ? " 🔥" : ""));
+      st.title = r.live ? "Checked in today" : "Not yet checked in today";
+      body.appendChild(tr);
+    });
+  }
+  const renderAll = () => { renderSelect(); renderMine(); renderBoard(); };
+
+  // ---- server ----
+  function apply(data) {
+    athletes = data.athletes || [];
+    logs = data.logs || {};
+    if (data.today && data.today !== todayKey) setToday(data.today);
+    online = true; $("offline").hidden = true;
+    renderAll();
+  }
+  async function api(path, body) {
+    const res = await fetch("/api/" + path, body
+      ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }
+      : { cache: "no-store" });
+    let data = null;
+    try { data = await res.json(); } catch (e) {}
+    if (!res.ok) throw new Error((data && data.error) || "Couldn't reach the server. Try again.");
+    return data;
+  }
+  async function refresh() {
+    if (busy) return;
+    try { apply(await api("data")); }
+    catch (e) { online = false; $("offline").hidden = false; renderMine(); renderBoard(); }
+  }
+  async function act(path, body, okMsg) {
+    busy = true; renderMine();
+    try { const data = await api(path, body); apply(data); if (okMsg) toast(typeof okMsg === "function" ? okMsg(data) : okMsg); return data; }
+    catch (e) { toast(e.message, true); return null; }
+    finally { busy = false; renderMine(); }
+  }
+
+  // ---- events ----
+  $("athleteSel").addEventListener("change", (e) => {
+    me = e.target.value || null;
+    try { me ? localStorage.setItem("arc-me", me) : localStorage.removeItem("arc-me"); } catch (err) {}
+    renderMine(); renderBoard();
+  });
+  $("addBtn").addEventListener("click", async () => {
+    const name = $("newName").value.trim();
+    if (!name) { toast("Type a name first.", true); return; }
+    const data = await act("athletes", { name }, (d) => d.existed ? d.athlete.name + " is already on the roster, so we selected it." : "Welcome, " + d.athlete.name + ". You're on the board.");
+    if (data) {
+      me = data.athlete.id;
+      try { localStorage.setItem("arc-me", me); } catch (e) {}
+      $("newName").value = "";
+      renderAll();
+    }
+  });
+  $("newName").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); $("addBtn").click(); } });
+  $("presentBtn").addEventListener("click", () => {
+    const undo = stats(me).live;
+    act("present", { athleteId: me, present: !undo }, undo ? "Today's check-in removed." : "Checked in for today.");
+  });
+  $("timeForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const h = parseInt($("hrs").value || "0", 10), m = parseInt($("mins").value || "0", 10);
+    const add = (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
+    const dk = $("day").value || todayKey;
+    if (h < 0 || m < 0 || m > 59) { toast("Minutes should be between 0 and 59.", true); return; }
+    if (add <= 0) { toast("Enter how long you trained.", true); return; }
+    if (add > 600) { toast("That's over 10 hours. Check the hours field.", true); return; }
+    if (dk > todayKey) { toast("You can't log time for a future date.", true); return; }
+    const data = await act("time", { athleteId: me, date: dk, minutes: add }, "Added " + fmt(add) + (dk === todayKey ? " for today." : " for " + dk + "."));
+    if (data) { $("hrs").value = ""; $("mins").value = ""; }
+  });
+  $("day").addEventListener("change", renderMine);
+  document.querySelectorAll(".sorts button").forEach((b) => b.addEventListener("click", () => { sortBy = b.dataset.sort; renderBoard(); }));
+
+  renderAll();
+  refresh();
+  setInterval(() => { if (!document.hidden) refresh(); }, 20000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+})();
+</script>
+</body>
+</html>
